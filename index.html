@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-Data</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000000;
+            font-family: 'Courier New', 'Fira Code', monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Contenedor que centra el prompt y los resultados */
+        .terminal {
+            width: 100%;
+            max-width: 750px;
+        }
+
+        /* Línea de entrada centrada */
+        .input-line {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .prompt {
+            color:#00ff00;
+            font-weight: bold;
+            font-size: 1.2rem;
+            user-select: none;
+        }
+        .prompt::before {
+            content: "x-> ";
+        }
+
+        #search-input {
+            background: transparent;
+            border: none;
+            color: #88ff88;
+            font-family: inherit;
+            font-size: 1.2rem;
+            width: 300px;
+            outline: none;
+            caret-color: #88ff88;
+        }
+
+        #search-input::placeholder {
+            color: #2c6e2c;
+            font-size: 0.9rem;
+        }
+
+        /* Resultados: abajo, alineados a la izquierda, fuente más pequeña */
+        .results {
+            margin-top: 2rem;
+            color: #00ff00;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+            text-align:center;
+        }
+
+        .result-line {
+            padding: 9px 0;
+            border-bottom: 1px dotted #2a6e2a;
+            font-size: 0.9rem;
+            color: #b8ffb8;
+            color:#00ff00;
+        }
+
+        .no-results {
+            color: #5a9e5a;
+            color:#00ff00;
+            font-style: italic;
+            font-size: 0.8rem;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 12px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #2e6e2e;
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+	.footer a{
+	    text-decoration:none;
+	    color: #00ff00;
+	}
+
+        /* Ajustes móviles */
+        @media (max-width: 550px) {
+            .prompt, #search-input {
+                font-size: 1rem;
+            }
+            #search-input {
+                width: 200px;
+            }
+            .result-line {
+                font-size: 0.7rem;
+            }
+            .footer {
+                font-size: 0.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="terminal">
+    <div class="input-line">
+        <span class="prompt"></span>
+        <input type="text" id="search-input" placeholder="Buscar estudiante..." autofocus>
+    </div>
+    <div id="results" class="results">
+       <center><b><div class="no-results">Base de datos de ingenieria</div></b></center>
+    </div>
+</div>
+<div class="footer"><b><a href="https://boxsay.t.me">by kelvin</a></b></div>
+<script src="data.js"></script>
+<script>
+    function formatRecord(record) {
+        // Formato: cédula | nombre (20 caracteres) | escuela
+        const namePadded = record.n.padEnd(20).slice(0, 20);
+        return `${record.c}  |  ${namePadded}  |  ${record.e}`;
+    }
+
+    function search(query) {
+        const q = query.trim().toLowerCase();
+        if (q === "") return [];
+        return data.filter(item =>
+            item.c.toString().includes(q) ||
+            item.n.toLowerCase().includes(q) ||
+            item.e.toLowerCase().includes(q)
+        );
+    }
+
+    function renderResults(results, query) {
+        const container = document.getElementById('results');
+        if (!results.length) {
+            container.innerHTML = `<div class="no-results">{sin resultados para "${escapeHtml(query)}"}</div>`;
+            return;
+        }
+        const html = results.map(rec => `<div class="result-line">${escapeHtml(formatRecord(rec))}</div>`).join('');
+        container.innerHTML = html;
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    const input = document.getElementById('search-input');
+    input.addEventListener('input', function(e) {
+        const query = e.target.value;
+        if (query.trim() === "") {
+            document.getElementById('results').innerHTML = '<div class="no-results">Base de datos de ingenieria</div>';
+        } else {
+            const filtered = search(query);
+            renderResults(filtered, query);
+        }
+    });
+
+    // Mantener foco
+    input.focus();
+</script>
+</body>
+</html>
